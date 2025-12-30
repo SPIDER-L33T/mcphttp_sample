@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mcp-server:
+    build: .
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - ENV=${ENV:-production}
+      - SECRET_KEY=${SECRET_KEY}
+      - API_KEY=${API_KEY}
+      - ENABLE_AUTH=${ENABLE_AUTH:-true}
+      - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-100}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - ENABLE_DOCS=${ENABLE_DOCS:-false}
+      - HOST=0.0.0.0
+      - PORT=8000
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
